@@ -33,6 +33,7 @@ if 4 > len(args) or len(args) >= 5:
     print usage
     exit(1)
 
+
 def generate_uuid(dash=False):
     if dash:
         return str(uuid.uuid4())
@@ -49,7 +50,23 @@ path_config_file_source = ''
 if options.template:
     path_config_file_source = path_repo_source+"/Templates/"+args[1]+"/vm.cfg"
 else:
-    path_config_file_source = path_repo_source+"/VirtualMachines/"+args[1]+"/vm.cfg"
+    yes = set(['si','s', ''])
+    no = set(['no','n'])
+
+    while True:
+        print "\nSegun las opciones desea copiar una VM. Se aseguro de que la maquina virtual se encuentra apagada? [si/no]"
+        choice = raw_input().lower()
+        if choice in yes:
+            path_config_file_source = path_repo_source+"/VirtualMachines/"+args[1]+"/vm.cfg"
+            break
+        elif choice in no:
+            print "\nEjecute el script cuando este seguro de que ha apagado la maquina virtual que desea mover.\n\n"
+            exit(0)
+        else:
+            print "Por favor responda con 'si' o 'no'"
+
+print "ahnosi "+path_config_file_source
+
 path_dir_discos_source = path_repo_source+"/VirtualDisks/"
 
 # Rutas destino
@@ -123,16 +140,16 @@ print "Copiando "+str(num_disks)+" archivos de discos virtuales a "+args[2]+", e
 
 while x < num_disks:
     print "Copiando disco \nOrig:"+path_discos_source[x]+"\nDest:"+path_discos_dest[x]+"\n"
-    #os.system('rsync -aS '+path_discos_source[x]+' '+args[2]+':'+path_discos_dest[x])
+    os.system('rsync -aS '+path_discos_source[x]+' '+args[2]+':'+path_discos_dest[x])
     x = x+1
 
 print "Verificando que los archivos de todos los discos existen en el servidor remoto\n"
-#for disk in path_discos_dest:
-    #os.system('ssh '+args[2]+' ls '+disk)
+for disk in path_discos_dest:
+    os.system('ssh '+args[2]+' ls '+disk)
 
 if options.template:
-    print "Fin de la copia del Template al servidor "+args[2]
+    print "\nFin de la copia del Template al servidor "+args[2]
     print "Refresque el repositorio destino en el OVM Manager y renombre los discos.\n\n"
 else:
-    print "Fin de la copia de la VM al servidor "+args[2]+"\n\n"
+    print "\nFin de la copia de la VM al servidor "+args[2]+"\n\n"
     print "Refresque el repositorio destino en el OVM Manager, renombre los discos, migre al server pool deseado y encienda la VM.\n\n"
